@@ -1,21 +1,997 @@
 <!DOCTYPE html>
-<html lang="ES">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bajon Express</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="Punto Gambeta — Portal privado de gestión deportiva. Acceso al panel de administración del complejo.">
+    <meta name="theme-color" content="#030504">
+    <meta name="color-scheme" content="dark">
+    <title>Punto Gambeta | Portal de Gestión Deportiva</title>
+    <link rel="icon" type="image/png" href="./assets/logo.png">
+    <link rel="preload" as="image" href="./assets/fondo-cancha.jpg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* =====================================================
+           VARIABLES
+        ===================================================== */
+        :root {
+            --verde: #a8ed00;
+            --verde-hover: #baff20;
+            --negro: #030504;
+            --negro-2: #080b09;
+            --blanco: #ffffff;
+            --gris: #929893;
+            --gris-dark: #626864;
+            --borde: rgba(255,255,255,.08);
+            --verde-soft: rgba(168,237,0,.08);
+            --error: #ff6b6b;
+            --radius: 12px;
+        }
+
+        /* =====================================================
+           RESET
+        ===================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+            background: var(--negro);
+            color: var(--blanco);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::selection {
+            background: var(--verde);
+            color: #000;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--verde);
+            outline-offset: 2px;
+        }
+
+        img {
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* =====================================================
+           CONTENEDOR PRINCIPAL
+        ===================================================== */
+        .login-page {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 46% 54%;
+        }
+
+        /* =====================================================
+           PANEL IZQUIERDO (fondo real: foto vertical nocturna)
+        ===================================================== */
+        .brand-panel {
+            position: relative;
+            min-height: 100vh;
+            overflow: hidden;
+            background-color: #0a0f0b;
+            background-image:
+                linear-gradient(90deg, rgba(3,5,4,.82) 0%, rgba(3,5,4,.45) 55%, rgba(3,5,4,.30) 100%),
+                linear-gradient(180deg, rgba(3,5,4,.55) 0%, rgba(3,5,4,0) 35%, rgba(3,5,4,0) 60%, rgba(3,5,4,.72) 100%),
+                url("./assets/fondo-cancha.jpg");
+            background-size: cover, cover, cover;
+            background-position: center 62%, center, center 62%;
+            background-repeat: no-repeat;
+        }
+
+        .brand-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 45%, rgba(168,237,0,.10), transparent 42%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .brand-panel::after {
+            content: "";
+            position: absolute;
+            top: -5%;
+            right: -2px;
+            width: 3px;
+            height: 110%;
+            background: var(--verde);
+            transform: rotate(4deg);
+            box-shadow: 0 0 15px rgba(168,237,0,.35);
+            z-index: 10;
+        }
+
+        .brand-content {
+            position: relative;
+            z-index: 3;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 50px;
+            text-align: center;
+        }
+
+        .main-logo {
+            width: min(390px,82%);
+            height: auto;
+            display: block;
+            /* El logo tiene fondo negro: screen lo funde con la foto */
+            mix-blend-mode: screen;
+            filter: drop-shadow(0 0 25px rgba(168,237,0,.15));
+        }
+
+        .brand-slogan {
+            margin-top: 27px;
+            color: rgba(255,255,255,.82);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 5px;
+            text-shadow: 0 2px 12px rgba(0,0,0,.8);
+        }
+
+        .brand-slogan span {
+            color: var(--verde);
+        }
+
+        /* =====================================================
+           PANEL DERECHO
+        ===================================================== */
+        .form-panel {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 35px 50px;
+            background: radial-gradient(circle at 50% 0%, rgba(168,237,0,.03), transparent 40%), var(--negro);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        /* =====================================================
+           TARJETA
+        ===================================================== */
+        .login-card {
+            padding: 40px;
+            border-radius: 20px;
+            background: linear-gradient(145deg, rgba(20, 24, 22, 0.7), rgba(9, 11, 10, 0.9));
+            border: 1px solid var(--borde);
+            box-shadow: 0 30px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* =====================================================
+           BADGE ADMIN & LOGO
+        ===================================================== */
+        .admin-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .small-logo {
+            width: 85px;
+            height: auto;
+            display: block;
+            margin-bottom: 15px;
+            mix-blend-mode: screen;
+            border-radius: 10px;
+        }
+
+        .admin-badge {
+            background: rgba(168,237,0,.1);
+            color: var(--verde);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 1px solid rgba(168,237,0,.2);
+            margin-bottom: 15px;
+        }
+
+        /* =====================================================
+           BIENVENIDA
+        ===================================================== */
+        .welcome {
+            text-align: center;
+        }
+
+        .welcome h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -.5px;
+            margin-bottom: 8px;
+            color: #ffffff;
+            line-height: 1.25;
+        }
+
+        .welcome h1 span {
+            color: var(--verde);
+        }
+
+        .welcome p {
+            color: var(--gris);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        /* =====================================================
+           FORMULARIO
+        ===================================================== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: #b0b5b1;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .input-container:focus-within .input-icon {
+            color: var(--verde);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5f6561;
+            pointer-events: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon svg {
+            width: 17px;
+            height: 17px;
+            display: block;
+        }
+
+        .input-container input {
+            width: 100%;
+            height: 52px;
+            padding: 0 46px 0 44px;
+            border-radius: var(--radius);
+            border: 1px solid rgba(255,255,255,.1);
+            outline: none;
+            background: rgba(0,0,0,.4);
+            color: white;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+        }
+
+        /* Sin icono a la derecha en email: menos padding */
+        .input-container input[type="email"] {
+            padding-right: 16px;
+        }
+
+        .input-container input::placeholder {
+            color: #4a504c;
+        }
+
+        .input-container input:hover {
+            border-color: rgba(255,255,255,.25);
+        }
+
+        .input-container input:focus {
+            border-color: var(--verde);
+            background: rgba(168,237,0,.02);
+            box-shadow: 0 0 0 4px rgba(168,237,0,.08);
+        }
+
+        .input-container input[aria-invalid="true"] {
+            border-color: rgba(255,107,107,.7);
+            box-shadow: 0 0 0 4px rgba(255,107,107,.1);
+        }
+
+        /* Autofill oscuro */
+        .input-container input:-webkit-autofill {
+            -webkit-text-fill-color: #fff;
+            -webkit-box-shadow: 0 0 0 60px #0b0e0c inset;
+            caret-color: #fff;
+        }
+
+        /* =====================================================
+           PASSWORD
+        ===================================================== */
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: #5f6561;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: var(--blanco);
+            background: rgba(255,255,255,.06);
+        }
+
+        .password-toggle svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+        }
+
+        .caps-warning {
+            display: none;
+            margin-top: 8px;
+            font-size: 11.5px;
+            color: #e8c547;
+        }
+
+        .caps-warning.visible {
+            display: block;
+        }
+
+        /* =====================================================
+           OPCIONES INFERIORES
+        ===================================================== */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            margin-top: -5px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--gris);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .remember-me input {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--verde);
+            cursor: pointer;
+        }
+
+        .forgot {
+            color: var(--verde);
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 12px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .forgot:hover {
+            color: var(--verde-hover);
+            text-decoration: underline;
+        }
+
+        /* =====================================================
+           BOTÓN LOGIN
+        ===================================================== */
+        .btn-login {
+            width: 100%;
+            height: 52px;
+            border: none;
+            border-radius: var(--radius);
+            background: var(--verde);
+            color: #000000;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform .2s ease, background .2s ease, box-shadow .2s ease, opacity .2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-login:hover:not(:disabled) {
+            background: var(--verde-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(168,237,0,.25);
+        }
+
+        .btn-login:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-login:disabled {
+            opacity: .75;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-login .arrow {
+            font-weight: 700;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2.5px solid rgba(0,0,0,.25);
+            border-top-color: #000;
+            animation: spin .7s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* =====================================================
+           INFORMACIÓN DEL SISTEMA
+        ===================================================== */
+        .system-info {
+            margin-top: 30px;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,.05);
+            border-radius: 14px;
+            background: rgba(0,0,0,.3);
+        }
+
+        .system-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,.05);
+        }
+
+        .system-title strong {
+            font-size: 11px;
+            color: var(--gris);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .online {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--blanco);
+            font-weight: 500;
+        }
+
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--verde);
+            box-shadow: 0 0 10px var(--verde);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(168,237,0, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(168,237,0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(168,237,0, 0); }
+        }
+
+        .server-stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 11px;
+            color: #8a908b;
+        }
+
+        .server-stats span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .server-stats strong {
+            color: #c6ccc7;
+            font-weight: 500;
+        }
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+        .footer {
+            margin-top: 25px;
+            text-align: center;
+            color: #a0a5a1;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .footer a {
+            color: var(--verde);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .footer a:hover {
+            color: var(--verde-hover);
+            text-decoration: underline;
+        }
+
+        /* =====================================================
+           MENSAJES
+        ===================================================== */
+        .message {
+            display: none;
+            margin-top: 15px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12.5px;
+            font-weight: 500;
+            line-height: 1.45;
+        }
+
+        .message.success {
+            display: block;
+            color: #000;
+            background: var(--verde);
+        }
+
+        /* Animación de acceso correcto */
+        .login-card.access-ok {
+            border-color: rgba(168,237,0,.6);
+            animation: accessGlow .9s ease both;
+        }
+
+        @keyframes accessGlow {
+            0% { box-shadow: 0 30px 60px rgba(0,0,0,.5), 0 0 0 0 rgba(168,237,0,.55); }
+            100% { box-shadow: 0 30px 60px rgba(0,0,0,.5), 0 0 0 22px rgba(168,237,0,0); }
+        }
+
+        .btn-login.access-ok {
+            background: var(--verde);
+            box-shadow: 0 0 24px rgba(168,237,0,.5);
+        }
+
+        .check-pop {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #000;
+            color: var(--verde);
+            font-weight: 800;
+            animation: checkPop .4s cubic-bezier(.2,1.6,.4,1);
+        }
+
+        @keyframes checkPop {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .message.error {
+            display: block;
+            color: #ffd7d7;
+            background: rgba(255,80,80,.12);
+            border: 1px solid rgba(255,80,80,.5);
+        }
+
+        .message.info {
+            display: block;
+            color: #d7e4d8;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.12);
+        }
+
+        .shake {
+            animation: shake .35s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            50% { transform: translateX(6px); }
+            75% { transform: translateX(-4px); }
+        }
+
+        /* =====================================================
+           TABLET & MOBILE
+        ===================================================== */
+        @media (max-width: 1050px) {
+            .login-page { grid-template-columns: 42% 58%; }
+            .form-panel { padding: 25px; }
+            .login-card { padding: 35px; }
+        }
+
+        @media (max-width: 800px) {
+            body { background: var(--negro); }
+            .login-page { display: flex; flex-direction: column; min-height: 100vh; }
+
+            .brand-panel {
+                display: block; width: 100%; min-height: 250px; height: 35vh;
+                background-position: center 60%, center, center 60%; flex-shrink: 0;
+            }
+            .brand-panel::after {
+                top: auto; bottom: -2px; left: 0; width: 100%; height: 2px;
+                transform: none; box-shadow: 0 0 12px rgba(168,237,0,.5);
+            }
+            .brand-content { min-height: 100%; padding: 30px 20px; justify-content: center; }
+            .main-logo { width: min(240px,72vw); }
+            .brand-slogan { margin-top: 15px; font-size: 10px; letter-spacing: 4px; }
+
+            .form-panel { padding: 30px 20px 40px; align-items: flex-start; }
+            .login-container { max-width: 480px; }
+            .login-card { padding: 30px 22px; }
+            .welcome h1 { font-size: 22px; }
+            .form-options { flex-wrap: wrap; }
+        }
+
+        @media (max-width: 380px) {
+            .login-card { padding: 26px 18px; }
+            .form-options { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* =====================================================
+           ANIMACIONES
+        ===================================================== */
+        .login-card {
+            animation: loginAppear .6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes loginAppear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+    </style>
 </head>
+
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="">Redes</a></li>
-                <li><img class="logo" src="Logo.png" alt=""></li>
-                <li><a href="">Cotizar Envio</a></li>
-            </ul>
-        </nav>
-    </header>
-    
+
+    <main class="login-page">
+
+        <!-- =================================================
+             MARCA / CANCHA
+        ================================================= -->
+        <section class="brand-panel" aria-label="Marca Punto Gambeta">
+            <div class="brand-content">
+                <img src="./assets/logo.png" alt="Punto Gambeta" class="main-logo" fetchpriority="high" onerror="this.style.display='none'">
+                <div class="brand-slogan">
+                    GESTIONÁ. ORGANIZÁ. <span>JUGÁ.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================
+             LOGIN DE ADMINISTRACIÓN
+        ================================================= -->
+        <section class="form-panel" aria-label="Acceso administrativo">
+            <div class="login-container">
+
+                <div class="login-card" id="loginCard">
+
+                    <!-- ENCABEZADO ADMIN -->
+                    <div class="admin-header">
+                        <img src="./assets/logo.png" alt="" aria-hidden="true" class="small-logo" loading="lazy" onerror="this.style.display='none'">
+                        <span class="admin-badge">Portal de Gestión Deportiva</span>
+                    </div>
+
+                    <!-- BIENVENIDA -->
+                    <div class="welcome">
+                        <h1>Acceso a <span>Panel de administración</span></h1>
+                        <p>Ingresá tus credenciales para gestionar el complejo.</p>
+                    </div>
+
+                    <!-- FORMULARIO -->
+                    <form id="loginForm" novalidate>
+
+                        <!-- EMAIL -->
+                        <div class="form-group">
+                            <label for="email">Correo electrónico administrador</label>
+                            <div class="input-container">
+                                <input type="email" id="email" name="email" placeholder="admin@puntogambeta.com"
+                                    autocomplete="username" inputmode="email" enterkeyhint="go"
+                                    aria-describedby="emailError" required>
+                                <span class="input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- PASSWORD -->
+                        <div class="form-group">
+                            <label for="password">Contraseña de acceso</label>
+                            <div class="input-container">
+                                <input type="password" id="password" name="password" placeholder="••••••••••"
+                                    autocomplete="current-password" enterkeyhint="go" minlength="6"
+                                    aria-describedby="capsWarning" required>
+                                <span class="input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                </span>
+                                <button type="button" class="password-toggle" id="togglePassword" aria-label="Mostrar contraseña" aria-pressed="false">
+                                    <svg id="eyeOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg id="eyeClosed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-2.16 3.19"/><path d="M6.61 6.61A17.5 17.5 0 0 0 2 12s3.5 7 10 7a10.7 10.7 0 0 0 4.39-.92"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+                                </button>
+                            </div>
+                            <div class="caps-warning" id="capsWarning" role="status">Bloq Mayús activado</div>
+                        </div>
+
+                        <!-- OPCIONES -->
+                        <div class="form-options">
+                            <label class="remember-me">
+                                <input type="checkbox" id="remember">
+                                Recordar mi sesión
+                            </label>
+                            <button type="button" class="forgot" id="forgotPassword">¿Olvidaste tu contraseña?</button>
+                        </div>
+
+                        <!-- LOGIN -->
+                        <button type="submit" class="btn-login" id="btnLogin">
+                            <span>Ingresar al Sistema</span>
+                            <span class="arrow" aria-hidden="true">→</span>
+                        </button>
+
+                        <div id="message" class="message" role="alert" aria-live="polite"></div>
+                        <div id="emailError" class="sr-only" aria-live="polite"></div>
+                    </form>
+
+                    <!-- =================================================
+                         INDICADOR ESTADO DEL SISTEMA
+                    ================================================== -->
+                    <div class="system-info" role="status" aria-label="Estado del servidor: operativo">
+                        <div class="system-title">
+                            <strong>Estado del servidor</strong>
+                            <div class="online">
+                                <span class="online-dot" aria-hidden="true"></span>
+                                Operativo
+                            </div>
+                        </div>
+                        <div class="server-stats">
+                            <span>◷ Sincronización: <strong>En tiempo real</strong></span>
+                            <span>v 2.4.1</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+                <div class="footer">
+                    <div>© <span id="year">2026</span> Punto Gambeta · Panel de Control Privado</div>
+                    <div>¿No tenés acceso? <a href="mailto:soporte@puntogambeta.com">Contactá a soporte técnico</a></div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ===================================================== -->
+    <script>
+        const loginForm = document.getElementById("loginForm");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const togglePassword = document.getElementById("togglePassword");
+        const eyeOpen = document.getElementById("eyeOpen");
+        const eyeClosed = document.getElementById("eyeClosed");
+        const message = document.getElementById("message");
+        const btn = document.getElementById("btnLogin");
+        const btnOriginal = btn.innerHTML;
+        const remember = document.getElementById("remember");
+        const capsWarning = document.getElementById("capsWarning");
+        const loginCard = document.getElementById("loginCard");
+
+        document.getElementById("year").textContent = new Date().getFullYear();
+
+        /* Recordar email guardado */
+        try {
+            const saved = localStorage.getItem("pg_remember_email");
+            if (saved) {
+                emailInput.value = saved;
+                remember.checked = true;
+            }
+        } catch (e) { /* almacenamiento no disponible */ }
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = "message " + type;
+        }
+
+        function clearMessage() {
+            message.textContent = "";
+            message.className = "message";
+        }
+
+        function shakeCard() {
+            loginCard.classList.remove("shake");
+            void loginCard.offsetWidth;
+            loginCard.classList.add("shake");
+        }
+
+        function setLoading(loading) {
+            btn.disabled = loading;
+            btn.innerHTML = loading
+                ? '<span class="spinner" aria-hidden="true"></span><span>Verificando…</span>'
+                : btnOriginal;
+        }
+
+        function isValidEmail(v) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+        }
+
+        /* MOSTRAR / OCULTAR PASSWORD */
+        function setPasswordVisible(visible) {
+            passwordInput.type = visible ? "text" : "password";
+            eyeOpen.style.display = visible ? "none" : "block";
+            eyeClosed.style.display = visible ? "block" : "none";
+            togglePassword.setAttribute("aria-label", visible ? "Ocultar contraseña" : "Mostrar contraseña");
+            togglePassword.setAttribute("aria-pressed", String(visible));
+        }
+
+        togglePassword.addEventListener("click", () => {
+            setPasswordVisible(passwordInput.type === "password");
+            passwordInput.focus();
+        });
+
+        /* Aviso Bloq Mayús */
+        function checkCaps(e) {
+            try {
+                const on = e.getModifierState && e.getModifierState("CapsLock");
+                capsWarning.classList.toggle("visible", !!on);
+            } catch (err) { /* no soportado */ }
+        }
+        passwordInput.addEventListener("keyup", checkCaps);
+        passwordInput.addEventListener("keydown", checkCaps);
+
+        /* Limpiar error al escribir */
+        [emailInput, passwordInput].forEach((el) => {
+            el.addEventListener("input", () => {
+                el.removeAttribute("aria-invalid");
+                if (message.classList.contains("error")) clearMessage();
+            });
+        });
+
+        /* LOGIN */
+        loginForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showMessage("Por favor, completá todos los campos.", "error");
+                if (!email) emailInput.setAttribute("aria-invalid", "true");
+                if (!password) passwordInput.setAttribute("aria-invalid", "true");
+                shakeCard();
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showMessage("Ingresá un correo electrónico válido.", "error");
+                emailInput.setAttribute("aria-invalid", "true");
+                emailInput.focus();
+                shakeCard();
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage("La contraseña debe tener al menos 6 caracteres.", "error");
+                passwordInput.setAttribute("aria-invalid", "true");
+                passwordInput.focus();
+                shakeCard();
+                return;
+            }
+
+            /* Guardar / borrar recuerdo */
+            try {
+                if (remember.checked) localStorage.setItem("pg_remember_email", email);
+                else localStorage.removeItem("pg_remember_email");
+            } catch (e) { /* ignorar */ }
+
+            setLoading(true);
+            clearMessage();
+
+            setTimeout(() => {
+                if (email.toLowerCase() === "admintotal@gmail.com" && password.trim().toLowerCase() === "admintotal") {
+                    setLoading(false);
+                    loginCard.classList.add("access-ok");
+                    btn.classList.add("access-ok");
+                    btn.innerHTML = '<span class="check-pop">✓</span><span>¡Bienvenido!</span>';
+                    btn.disabled = true;
+                    showMessage("Acceso correcto. Entrando al panel...", "success");
+                    setTimeout(() => { window.location.href = "./Panel-Betav0.html"; }, 1400);
+                } else {
+                    setLoading(false);
+                    emailInput.setAttribute("aria-invalid", "true");
+                    passwordInput.setAttribute("aria-invalid", "true");
+                    showMessage("Credenciales incorrectas. Verificá e intentá de nuevo.", "error");
+                    shakeCard();
+                }
+            }, 1200);
+        });
+
+        /* RECUPERAR PASSWORD */
+        document.getElementById("forgotPassword").addEventListener("click", () => {
+            const email = emailInput.value.trim();
+            showMessage(
+                email && isValidEmail(email)
+                    ? "Se envió un enlace de recuperación a " + email + "."
+                    : "Ingresá tu correo arriba y reintentá, o escribí a soporte@puntogambeta.com.",
+                "info"
+            );
+        });
+    </script>
 </body>
 </html>
